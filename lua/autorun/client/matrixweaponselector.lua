@@ -79,7 +79,7 @@ end);
 --[[------------------------------------------------------------------
 	Create menu
 ]]--------------------------------------------------------------------
-hook.Add( "PopulateToolMenu", "vgntk_menu", function()
+hook.Add( "PopulateToolMenu", "matrixwepsel_menu", function()
 	spawnmenu.AddToolMenuOption( "Options", "Selenter1", "matrixwepsel", "Matrix Weapon Selector", nil, nil, function(panel)
 		panel:ClearControls();
 
