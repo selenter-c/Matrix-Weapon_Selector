@@ -1,7 +1,5 @@
 --[[------------------------------------------------------------------
-
   CONFIGURATION
-
 ]]--------------------------------------------------------------------
 
 -- Parameters
@@ -9,9 +7,11 @@ local HIGHLIGHT_COLOR = Color(155, 20, 121, 100); -- Highlighted items color
 local UNHIGHLIGHTED_COLOR = Color(100, 100, 100, 100); -- Unhighlighted items color
 local COLOR_CONVAR = "matrixwepsel_col";
 local UNHIGHLIGHTED_COLOR_CONVAR = "matrixwepsel_col_u";
+local SELECTOR_FONT = "NewWeaponSelectFont"
 
 -- Console variables
 local isEnabled = CreateClientConVar("matrixwepsel_enabled", 1, true, nil, "Enables the Matrix's Weapon Selector");
+local isFont = CreateClientConVar("matrixwepsel_font", "NewWeaponSelectFont", nil, "")
 
 --[[------------------------------------------------------------------
 	Creates a set of convars to set a color
@@ -42,6 +42,7 @@ local function ResetColor(name, color)
 	RunConsoleCommand(name .. "_g", color.g);
 	RunConsoleCommand(name .. "_b", color.b);
 	RunConsoleCommand(name .. "_a", color.a);
+	RunConsoleCommand("matrixwepsel_font", "NewWeaponSelectFont");
 end
 
 --[[------------------------------------------------------------------
@@ -76,16 +77,26 @@ concommand.Add("matrixwepsel_reset", function(ply, com, args)
 	ResetColor(UNHIGHLIGHTED_COLOR_CONVAR, UNHIGHLIGHTED_COLOR);
 end);
 
+concommand.Add("matrixwepsel_reset_fontonly", function(ply, com, args)
+	RunConsoleCommand("matrixwepsel_font", "NewWeaponSelectFont")
+end)
+
 --[[------------------------------------------------------------------
 	Create menu
 ]]--------------------------------------------------------------------
 hook.Add( "PopulateToolMenu", "matrixwepsel_menu", function()
-	spawnmenu.AddToolMenuOption( "Options", "Selenter1", "matrixwepsel", "Matrix Weapon Selector", nil, nil, function(panel)
+	spawnmenu.AddToolMenuOption( "Options", "Selenter", "matrixwepsel", "Matrix Weapon Selector", nil, nil, function(panel)
 		panel:ClearControls();
 
 		panel:AddControl( "CheckBox", {
 			Label = "Enabled",
 			Command = "matrixwepsel_enabled",
+			}
+		);
+
+		panel:AddControl( "TextBox", {
+			Label = "Change font",
+			Command = "matrixwepsel_font",
 			}
 		);
 
@@ -112,20 +123,24 @@ hook.Add( "PopulateToolMenu", "matrixwepsel_menu", function()
 			Command = "matrixwepsel_reset",
 			}
 		);
+
+		panel:AddControl( "Button", {
+			Label = "Reset settings Font to default",
+			Command = "matrixwepsel_reset_fontonly",
+			}
+		);
 	end );
 end);
 
 --[[------------------------------------------------------------------
-
   DRAW WEAPON SELECTOR
-
 ]]--------------------------------------------------------------------
 function NewDrawText(text, x, y, color, alignX, alignY, font, alpha)
 	color = color or color_white
 
 	return draw.TextShadow({
 		text = text,
-		font = "NewWeaponSelectFont",
+		font = GetConVarString("matrixwepsel_font") or "Default",
 		pos = {x, y},
 		color = color,
 		xalign = alignX or TEXT_ALIGN_LEFT,
@@ -204,7 +219,7 @@ end
 					end
 				end
 
-				surface.SetFont("NewWeaponSelectFont")
+				surface.SetFont(GetConVarString("matrixwepsel_font") or "Default")
 				local weaponName = NewWeaponSelecter.weapons[i]:GetPrintName():upper()
 				local _, ty = surface.GetTextSize(weaponName)
 				local scale = 1 - math.abs(theta * 2)
@@ -217,7 +232,7 @@ end
 				matrix:Scale(Vector(1, 1, 0) * scale)
 
 				cam.PushModelMatrix(matrix)
-					NewDrawText(weaponName, ebatTextKruto, ty / 2 - 1, color3, 0, 1, "NewWeaponSelectFont")
+					NewDrawText(weaponName, ebatTextKruto, ty / 2 - 1, color3, 0, 1, GetConVarString("matrixwepsel_font"))
 					if i > NewWeaponSelecter.index - 4 and i < NewWeaponSelecter.index + 4 then
 					surface.SetTexture(surface.GetTextureID("vgui/gradient-l"))
 					surface.SetDrawColor(color2)
